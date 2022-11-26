@@ -13,7 +13,7 @@ import json
 @login_required
 @app.route('/order/<order_id>', methods=['GET'])
 def get_order(order_id):
-    user = User.query.filter_by(id=current_user.id).first_or_404()
+    user = User.query.filter_by(id=1).first_or_404()
     order = None
     for rest in user.restaurants:
         for ord in rest.orders:
@@ -34,7 +34,7 @@ def get_order(order_id):
 @app.route('/order', methods=['GET'])
 def get_all_orders():
     restaurant = Restaurant.query.filter_by(id=request.args.get('restaurant_id'),
-                                            owner_id=current_user.id).first_or_404()
+                                            owner_id=1).first_or_404()
     mapped = map(lambda order: order.to_dict(), restaurant.orders)
 
     return json.dumps(mapped, indent=4)
@@ -72,7 +72,7 @@ def create_order():
 @app.route('/order_state', methods=['POST'])
 def set_order_state():
     order = Order.query.filter_by(id=request.args.get('id')).first_or_404()
-    restaurant = Restaurant.query.filter_by(id=order.restaurant_id, owner_id=current_user.id).first_or_404()
+    restaurant = Restaurant.query.filter_by(id=order.restaurant_id, owner_id=1).first_or_404()
 
     order.state = request.args.get('state')
     db.session.commit()

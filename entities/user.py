@@ -18,3 +18,7 @@ class User(UserMixin, db.Model):
         self.password = password
         self.email = email
         self.type = type
+
+    def get_id(self):
+        # this matches what user_loader needs to uniquely load a user
+        return self.id

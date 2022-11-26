@@ -10,15 +10,19 @@ import json
 @cross_origin(origin='*')
 @app.route('/menu/<menu_id>/', methods=['GET'])
 def get_menu(menu_id):
-    menu = Menu.query.filter_by(id=menu_id).first_or_404()
-    return json.dumps(menu.to_dict(), indent=4)
+    try:
+        int(menu_id)
+        menu = Menu.query.filter_by(id=menu_id).first_or_404()
+        return json.dumps(menu.to_dict(), indent=4)
+    except:
+        return "", 400
 
 
 @cross_origin(origin='*')
 @login_required
 @app.route('/menu', methods=['GET'])
 def get_all_menu():
-    if Restaurant.query.filter_by(id=request.args.get('restaurant_id'), owner_id=current_user.id).first:
+    if Restaurant.query.filter_by(id=request.args.get('restaurant_id'), owner_id=1).first:
         all_menu = Menu.query.filter_by(restaurant_id=request.args.get('restaurant_id')).all_or_404()
         return json.dumps([menu.to_dict() for menu in all_menu], indent=4)
     return json.dumps({'result': 'You do not have access to this resource'}, indent=4), 404
@@ -32,7 +36,7 @@ def create_or_update_menu():
     restaurant_id = body.get('body')
     dishes = body.get('dishes')
 
-    restaurant = Restaurant.query.filter_by(id=restaurant_id, owner_id=current_user.id).first_or_404()
+    restaurant = Restaurant.query.filter_by(id=restaurant_id, owner_id=1).first_or_404()
     menu = restaurant.menu
     if not menu:
         menu = Menu(restaurant_id)
@@ -45,7 +49,7 @@ def create_or_update_menu():
             for k, v in filtered[0].__dict__:
                 dish[k] = v
         else:
-            db.session.delete(dish)
+            dish.menu_id = None
     for dish in dishes:
         filtered = list(filter(lambda d: d.id == dish.id, menu.dishes))
         if len(filtered) == 0:

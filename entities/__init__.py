@@ -52,40 +52,38 @@ if not done:
     db.session.add(done)
 db.session.commit()
 
-types = DishType.query.all()
-meat = type_is_included('Meat', types)
-fish = type_is_included('Fish', types)
-drinks = type_is_included('Drinks', types)
-
-if not meat:
-    meat = DishType('Meat')
-    db.session.add(meat)
-if not fish:
-    fish = DishType('Fish')
-    db.session.add(fish)
-if not drinks:
-    drinks = DishType('Drinks')
-    db.session.add(drinks)
-db.session.commit()
+# types = DishType.query.all()
+# meat = type_is_included('Meat', types)
+# fish = type_is_included('Fish', types)
+# drinks = type_is_included('Drinks', types)
+#
+# if not meat:
+#     meat = DishType('Meat')
+#     db.session.add(meat)
+# if not fish:
+#     fish = DishType('Fish')
+#     db.session.add(fish)
+# if not drinks:
+#     drinks = DishType('Drinks')
+#     db.session.add(drinks)
+# db.session.commit()
 
 # init mocks
 
-user = User('login1', generate_password_hash('password1'), 'rgwergwergwre1', UserType.OWNER)
-db.session.add(user)
-db.session.commit()
+# user = User('login1', generate_password_hash('password1'), 'rgwergwergwre1', UserType.OWNER)
+# db.session.add(user)
+# db.session.commit()
 
 # user = User('login', generate_password_hash('password'), 'rgwergwergwre', UserType.OWNER)
 # db.session.add(user)
 # db.session.commit()
-#
+# #
 # restaurant = Restaurant('restaurant_name', 'restaurant_address', 'restaurant_description', user)
 # db.session.add(restaurant)
 # db.session.commit()
 #
 # menu = Menu(restaurant)
-# menu1 = Menu(restaurant)
 # db.session.add(menu)
-# db.session.add(menu1)
 # db.session.commit()
 #
 # dish1 = Dish('name11', 'Meat', 'description11', menu, 100, 'USD', 'picture_id', True)
@@ -107,4 +105,4 @@ db.session.commit()
 #
 # db.session.add_all([dish1, dish2, dish3, dish4, dish5, dish6, dish7, dish8, dish9, dish10, dish11, dish11])
 
-db.session.commit()
+# db.session.commit()
