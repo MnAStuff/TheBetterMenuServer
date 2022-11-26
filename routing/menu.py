@@ -8,7 +8,7 @@ import json
 
 
 @cross_origin(origin='*')
-@app.route('/menu/<menu_id>', methods=['GET'])
+@app.route('/menu/<menu_id>/', methods=['GET'])
 def get_menu(menu_id):
     menu = Menu.query.filter_by(id=menu_id).first_or_404()
     return json.dumps(menu.to_dict(), indent=4)
@@ -27,19 +27,31 @@ def get_all_menu():
 @cross_origin(origin='*')
 @login_required
 @app.route('/menu', methods=['POST'])
-def create_menu():
+def create_or_update_menu():
     body = json.loads(request.data)
     restaurant_id = body.get('body')
     dishes = body.get('dishes')
 
-    Restaurant.query.filter_by(id=restaurant_id, owner_id=current_user.id).first_or_404()
+    restaurant = Restaurant.query.filter_by(id=restaurant_id, owner_id=current_user.id).first_or_404()
+    menu = restaurant.menu
+    if not menu:
+        menu = Menu(restaurant_id)
+        db.session.add(menu)
+        db.session.commit()
 
-    menu = Menu(restaurant_id)
-    db.session.add(menu)
-    db.session.commit()
-
+    for dish in menu.dishes:
+        filtered = list(filter(lambda d: d.id == dish.id, dishes))
+        if len(filtered) == 1:
+            for k, v in filtered[0].__dict__:
+                dish[k] = v
+        else:
+            db.session.delete(dish)
     for dish in dishes:
-        db.session.add(Dish(dish.name, dish.dish_type, dish.description, menu, dish.price, dish.currency, dish.photo_id, dish.enabled))
+        filtered = list(filter(lambda d: d.id == dish.id, menu.dishes))
+        if len(filtered) == 0:
+            db.session.add(
+                Dish(dish.name, dish.dish_type, dish.description, menu, dish.price, dish.currency, dish.photo_id,
+                     dish.enabled))
     db.session.commit()
 
     return json.dumps({'manu_id': menu.id}, indent=4)

@@ -1,5 +1,6 @@
 import datetime
 from entities import Restaurant, User, Order, OrderState, OrderedDish
+from entities.event import Event
 from entities.menu import Menu
 from main import app, db
 from flask_cors import cross_origin
@@ -43,16 +44,40 @@ def get_all_orders():
 @app.route('/order', methods=['POST'])
 def create_order():
     body = json.loads(request.data)
-
-    order = Order(OrderState.NEW, datetime.datetime.now())
-    db.session.add(order)
-
     ordered_dishes = body.get("positions")
+    restaurant_id = body.get("restaurant_id")
+
+    restaurant = Restaurant.query.filter_by(id=restaurant_id).first_or_404()
+
+    date = datetime.datetime.now()
+    order = Order(OrderState.NEW, date)
+    db.session.add(order)
+    db.session.commit()
+
     if not ordered_dishes or len(ordered_dishes):
-        json.dumps({'result': 'You do not have access to this resource'}, indent=4), 401
+        json.dumps({'result': 'Empty order.'}, indent=4), 406
 
     for ordered_dish in ordered_dishes:
         db.session.add(OrderedDish(order.id, ordered_dish.dish_id, ordered_dish.count, ordered_dish.comment))
+    db.session.commit()
+
+    db.session.add(Event(restaurant, order))
+    db.session.commit()
+
+    return json.dumps({'result': 'Success'}, indent=4)
+
+
+@cross_origin(origin='*')
+@login_required
+@app.route('/order_state', methods=['POST'])
+def set_order_state():
+    order = Order.query.filter_by(id=request.args.get('id')).first_or_404()
+    restaurant = Restaurant.query.filter_by(id=order.restaurant_id, owner_id=current_user.id).first_or_404()
+
+    order.state = request.args.get('state')
+    db.session.commit()
+
+    db.session.add(Event(restaurant, order))
     db.session.commit()
 
     return json.dumps({'result': 'Success'}, indent=4)
