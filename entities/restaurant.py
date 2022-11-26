@@ -11,10 +11,20 @@ class Restaurant(db.Model):
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     menu = db.relationship('Menu', backref='restaurant', lazy=True)
+    orders = db.relationship('Order', backref='restaurant', lazy=True)
 
     def __init__(self, name, address, description, owner):
         self.name = name
         self.address = address
         self.description = description
         self.owner_id = owner.id
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'owner_id': self.owner_id,
+            'name': self.name,
+            'address': self.address,
+            'description': self.description
+        }
 

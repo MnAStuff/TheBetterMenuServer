@@ -7,7 +7,7 @@ class Menu(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurant.id'), nullable=False)
 
-    dishes = db.relationship('Dish', backref='menu', lazy=False)
+    dishes = db.relationship('Dish', backref='menu', lazy=True)
 
     def __init__(self, restaurant):
         self.restaurant_id = restaurant.id

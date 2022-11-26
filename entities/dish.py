@@ -36,6 +36,3 @@ class Dish(db.Model):
             'currency': self.currency,
             'photo_id': self.photo_id
         }
-
-
-db.create_all()

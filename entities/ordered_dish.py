@@ -1,27 +1,28 @@
-from dataclasses import dataclass
+from sqlalchemy.orm import backref
+
 from main import db
 
 
-@dataclass
-class Menu(db.Model):
+class OrderedDish(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurant.id'), nullable=False)
+    order_id = db.Column(db.Integer, db.ForeignKey('order.id'), nullable=False)
+    dish_id = db.Column(db.Integer, db.ForeignKey('dish.id'), nullable=False)
+    count = db.Column(db.Integer, nullable=False)
+    comment = db.Column(db.String(200))
 
-    dishes = db.relationship('Dish', backref='menu', lazy=False)
+    dish = db.relationship('Dish', lazy=False, backref=backref('dish_id', lazy='dynamic'))
 
-    def __init__(self, restaurant):
-        self.restaurant_id = restaurant.id
+    def __init__(self, order_id, dish_id, count, comment):
+        self.order_id = order_id
+        self.dish_id = dish_id
+        self.count = count
+        self.comment = comment
 
     def to_dict(self):
-        dishes_by_category = {}
-        for dish in self.dishes:
-            if not dishes_by_category.get(dish.dish_type):
-                dishes_by_category[dish.dish_type] = [dish.to_dict()]
-            else:
-                dishes_by_category[dish.dish_type].append(dish.to_dict())
-
         return {
             'id': self.id,
-            'restaurant_id': self.restaurant_id,
-            'dishes':  dishes_by_category
+            'order_id': self.order_id,
+            'dish': self.dish.to_dict(),
+            'comment': self.comment,
+            'count': self.count
         }
